@@ -2,6 +2,7 @@
 #include "general.h"
 #include <math.h>
 //------------------------------ Implemenation  -----------------------------
+//this will be hard
 Matrix::Matrix() //default constructor
 {
 	rows=columns=0;
