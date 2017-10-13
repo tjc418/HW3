@@ -3,6 +3,8 @@
 #include <math.h>
 //------------------------------ Implemenation  -----------------------------
 //this will be hard
+
+// you bet your ass
 Matrix::Matrix() //default constructor
 {
 	rows=columns=0;
