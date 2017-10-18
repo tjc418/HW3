@@ -1,31 +1,59 @@
 #include "Vector.h"
 #include "general.h"
 #include <math.h>
+#include <iostream>
+#include <cstdlib>
+using namespace std;
 //------------------------------ Implemenation  -----------------------------
 Vector::Vector()
 {
+	cout<<"default constructing vector..."<<endl; // Standard constructor 
+        size=0;
+        buf=NULL;
 }
 Vector::Vector(int s)
 {
+	cout<<"constructing vector with "<<s<<" component(s)"<<endl;
+        size=s;
+        buf= new double[s];
+
 }
-Vector::Vector(const Vector& a)
+Vector::Vector(const Vector& A)
 {
+	cout<<"copy constructor..."<<endl;
+        this->size=A.size; // "this" the pointer points the object it self
+        buf=new double [size];
+        for(int i=0;i<size;i++)
+        buf[i]=A.buf[i];
+
 }
 Vector::~Vector()
 {
+        cout<<"Destructor: cleaning up...."<<endl;
+        size=0;
+        if(buf)
+	{
+                delete[] buf;
+        	buf=NULL;
+	}
 }
 
 //Operator overloading
 Vector& Vector::operator = (const Vector& B)
 {
+
+
 	return *this;
 }
 bool Vector::operator ==(const Vector& B)
 {
-
+        if(this->size != B.size) return false;
+        for(int i=0;i<size;i++)
+                if(buf[i] != B.buf[i]) return false;
 }
 bool Vector::operator !=(const Vector& B)
 {
+
 	return !(*this == B);
 }
 Vector Vector::operator +(const Vector& B)
