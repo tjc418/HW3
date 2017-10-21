@@ -154,7 +154,24 @@ bool Vector::Insert(double x, int location) //insert x at location
 
 bool Vector::Remove(int location)//remove the value at location
 {
-	return true;
+	if(location>=size)
+	{	cout<<"Location is not in the Vector"<<endl;
+		return false;
+	}
+	else
+	{	cout<<"Vector after removing location"<<endl;
+                for(int i=0;i<location;i++) //insert in buf all the values until location
+		{       cout<<buf[i]<<" ";
+                }
+		for(int i=location+1;i<size;i++)
+		{	buf[i-1]=buf[i];
+			cout<<buf[i]<<" ";
+		}
+		cout<<endl;
+		size= size-1;
+	}
+                return true;
+
 }
 void Vector::Clear()//remove all data from the Vector.
 {
@@ -163,6 +180,48 @@ void Vector::Clear()//remove all data from the Vector.
 }
 void Vector::Sort(bool Ascending) //sorting.
 {
+                if (Ascending==true) 
+                {
+                int i;
+                int j;
+                int aux;
+                cout<<"Sorted vector(Ascending)"<<endl;
+                for (int i=size-1; i>=0; i=i-1)
+                {
+                        for (int j=0; j<size-1;j++)
+                        {
+                                if (buf[j]<buf[j+1])
+                                {
+                                        aux=buf[j];
+                                        buf[j]=buf[j+1];
+                                        buf[j+1]=aux;
+                                }
+                        }
+                                cout<<buf[i]<<" ";
+                }
+                        cout<<endl;
+                }
+                else
+                {
+                        int i;
+                        int j;
+                        int aux;
+                        for (int i=size-1; i>=0; i=i-1)
+                        {
+                                for (int j=0; j<size-1;j++)
+                                {
+                                        if (buf[j]>buf[j+1])
+                                        {
+                                                aux=buf[j];
+                                                buf[j]=buf[j+1];
+                                                buf[j+1]=aux;
+                                        }
+                                }
+                                cout<<buf[i]<<" ";
+                        }
+                        cout<<endl;
+                }
+
 }
 
 ostream& operator << (ostream& output, const Vector& A)
@@ -176,7 +235,6 @@ istream& operator >> (istream& input, Vector& A)
 
 Vector operator *(double a, const Vector&A)	// a*A, why global function overloading?	
 {
-	Vector tmp=A;
-
-	return tmp;
+        //Vector tmp
+       // return tmp;
 }
