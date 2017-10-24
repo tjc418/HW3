@@ -119,7 +119,7 @@ double& Vector::operator [](int i) const//A[i], read only;
 }
 		
 //Member functions
-int Vector::Size() //get the size of the Vector
+int Vector::Size() const  //get the size of the Vector
 {
 	return size;
 }
@@ -226,15 +226,28 @@ void Vector::Sort(bool Ascending) //sorting.
 
 ostream& operator << (ostream& output, const Vector& A)
 {
+        for(int i=0; i<A.size;i++)
+        {        output<<A[i];
+	}
 	return output;
 }
 istream& operator >> (istream& input, Vector& A)
 {
+        if(A.buf) delete[] A.buf;
+	BypassComment (input);//Eliminate the blank spaces in the input file
+	input>>A.size;
+        A.buf=new double[A.size];
+        for(int i=0;i<A.size;i++)
+        {	input>>A[i];
+	}
 	return input;
 }
 
-Vector operator *(double a, const Vector&A)	// a*A, why global function overloading?	
+Vector operator *(double a, const Vector& A)	// a*A, why global function overloading?	
 {
-        //Vector tmp
-       // return tmp;
+        Vector tmp(A);
+        for(int i=0; i<A.Size();i++)
+                tmp[i]=a*A[i];
+        return tmp;
+
 }

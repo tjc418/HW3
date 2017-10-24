@@ -29,7 +29,7 @@ class Vector
 		double& operator [](int i) const;//A[i], read only;
 		
 		//Member functions
-		int Size(); //get the size of the Vector
+		int Size() const; //get the size of the Vector
 		bool Insert(double x, int location); //insert x at location
 		bool Remove(int location);//remove the value at location
 		void Clear();//remove all data from the Vector.
@@ -46,7 +46,7 @@ class Vector
 	friend istream& operator >> (istream& input, Vector& A);
 
 };
-	Vector operator *(double a, const Vector&A);// a*A, why global function overloading?	
+	Vector operator *(double a, const Vector& A);// a*A, why global function overloading?	
 
 
 #endif
