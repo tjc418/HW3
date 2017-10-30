@@ -174,11 +174,24 @@ Matrix Matrix::operator - () //unary -
 }
 double& Matrix::operator ()( int i,  int j)// access (i,j)
 {
-	return buf[i*columns+j]; // is this correct? Unsafe	//why is this unsafe?? -T
+	if(i<0 || i>rows || j<0 || j<columns)			//Boundary Conditions for Index Paramaters
+	{
+		cout<<"Check index parameters, returning first value (0,0)"<<endl;
+		return buf[0];
+	}
+
+	return buf[i*columns+j]; 
 }
 double& Matrix::operator()( int i,  int j) const //read only
 {
-	return buf[i*columns+j]; // is this correct? (yes).  Unsafe (Why??) -T
+
+        if(i<0 || i>rows || j<0 || j>columns)			//Index Paramaters BC
+	{
+		cout<<"Check index parameters, returning first value (0,0)"<<endl;
+	return buf[0];
+	}
+
+	return buf[i*columns+j]; 
 }
 ostream& operator << (ostream& output, const Matrix& A)
 {
