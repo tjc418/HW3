@@ -4,12 +4,13 @@
 //------------------------------ Implemenation  -----------------------------
 Matrix::Matrix() //default constructor
 {
-        cout<<"default constructing matrix..."<<endl;
+	cout<<"default constructing Matrix..."<<endl;
 	rows=columns=0;
 	buf=NULL;
 }
 Matrix::Matrix( int m,  int n)//declare an mxn matrix
 {
+
         cout<<"constructing matrix with "<<m<<" rows"<<"and "<<n<<" columns"<<endl;
         buf=NULL;
         if (m>=0 && n>=0)
@@ -20,32 +21,54 @@ Matrix::Matrix( int m,  int n)//declare an mxn matrix
         else
                 cout<<"Please enter positive integers for the Matrix Dimensions"<<endl;
 }
-Matrix::Matrix(const Matrix& A) //copy constructor
+Matrix::Matrix(const Matrix& A) //copy constructor	//is there a benefit or necessity for using this-> pointer?
 {
-        cout<<"copy constructor..."<<endl;
-        rows=A.rows;
-        columns=A.columns;
-        buf=new double [rows*columns];
-        for (int i=0; i<(rows*columns); i++)
-        {	buf[i]=A.buf[i];
+
+	cout<<"Copying  Matrix "<<A<<"..."<<endl;
+	rows = A.rows;					//this->rows	?
+	columns =  A.columns;				//this->columns	?
+	buf = new double[rows*columns];
+	for(int i=0;i<rows*columns;i++)
+	{
+		buf[i]=A.buf[i];
 	}
 }
 Matrix::~Matrix()//destructor
 {
-        cout<<"Destructor: cleaning up...."<<endl;
-        rows=0;
-        columns=0;
-        if (buf) delete[] buf;
+	cout<<"Janitor is cleaning up. Destructing  Matrix..."<<endl;	//is there a way to say "Destructing Matrix "<<*this<<endl ?
+	rows=0;
+	columns=0;
+	if(buf)
+	{
+	delete[] buf;
+	}
 
 }
 //Assignment
 Matrix& Matrix::operator = (const Matrix& A) //overloading =
 {
+	if(buf) delete[] buf; //deletes buffer of "this"
+	rows = A.rows;
+	columns = A.columns;
+	buf = new double[rows*columns];
+        for(int i=0;i<rows*columns;i++)
+        {
+                buf[i]=A.buf[i];
+        }
+
 	return *this;
+
 }
-//operators
-bool Matrix::operator == (const Matrix& A)//overloading ==
+//____________________operators______________________________________
+
+bool Matrix::operator == (const Matrix& A)//overloading ==		//fix for tolerance!! -T	//Handle NULL Matrices! -T
 {
+	if(rows!=A.rows || columns!=A.columns) return false;
+        for(int i=0;i<rows*columns;i++)
+        {
+                if(buf[i]!=A.buf[i]) return false;
+        }
+
 	return true;
 }
 bool Matrix::operator != (const Matrix& A)//overloading !=
@@ -54,24 +77,89 @@ bool Matrix::operator != (const Matrix& A)//overloading !=
 }
 Matrix& Matrix::operator += (const Matrix& A) //overloading +=
 {
+        if(rows!=A.rows || columns!=A.columns)		//Check for same dimensions
+	{
+	cout<<"Matrices of different dimensions, returning original Matrix"<<endl;
+	return *this;
+	}
+							//Add buffer values
+        for(int i=0;i<rows*columns;i++)
+        {
+		buf[i]=buf[i]+A.buf[i];
+        }
 	return *this;
 }
 Matrix& Matrix::operator -=(const Matrix& A) //overloading -=
 {
+	if(rows!=A.rows || columns!=A.columns)          //Check for same dimensions
+	{
+	cout<<"Matrices of different dimensions, returning original Matrix"<<endl;
+	return *this;
+	}
+	                                                //Subtract buffer values
+	for(int i=0;i<rows*columns;i++)
+	{
+		buf[i]=buf[i]-A.buf[i];
+	}
 	return *this;
 }
 Matrix& Matrix::operator *=(const Matrix& A) //overloading *=
 {
+
+        if(columns!=A.rows)          //Check for same dimensions
+        {
+        cout<<"Cannot multiply, returning original Matrix"<<endl;
+        return *this;
+        }
+	Matrix tmp(rows, A.columns);
+	double sum;
+	int nrows=rows;
+	int ncols=A.columns;
+
+        for(int i=0; i<nrows; i++)			//counts through new Matrix Rows
+        {
+		for(int j=0; j<ncols; j++)		//counts through new Matrix Columns
+		{	sum=0;
+			for(int k=0; k<rows; k++)	//Provides Numerical Value for Mat[i,j]
+			{
+				sum = sum + buf[i*columns+k]*A.buf[k*A.columns+j];
+			}
+			tmp.buf[i*ncols+j]=sum;
+		}
+        }
+	*this=tmp;
+
 	return *this;
 }
 
 Matrix& Matrix::operator *=(double a) //overloading *=
 {
+	for(int i=0; i<rows*columns; i++)
+	{
+		buf[i]=buf[i]*a;
+	}
+
 	return *this;
 }
-Matrix& Matrix::operator *=(const Vector& b) //overloading *=
+
+Matrix& Matrix::operator *=(const Vector& b) //overloading *=		does this work?
 {
+	const int Sizeb=b.Size();
+
+	Matrix tmp(1,Sizeb);
+	if(rows!=1)
+	{
+	cout<<"Cannot compute cross product, matrix has more than 1 column, returning original Matrix"<<endl;
 	return *this;
+	}
+	for(int i=0; i<Sizeb; i++)       //turn vector into [1*size] matrix
+	{
+		tmp.buf[i]=b[i];
+	}
+
+
+					//return the cross product
+	return ((*this)*=tmp);
 }
 
 Matrix Matrix::operator + () //unary +
@@ -81,32 +169,49 @@ Matrix Matrix::operator + () //unary +
 Matrix Matrix::operator - () //unary -
 {
 	Matrix tmp;
+	tmp=(*this)*(-1);
 	return tmp;
 }
 double& Matrix::operator ()( int i,  int j)// access (i,j)
 {
-	return buf[i*columns+j]; // is this correct? Unsafe
+	return buf[i*columns+j]; // is this correct? Unsafe	//why is this unsafe?? -T
 }
 double& Matrix::operator()( int i,  int j) const //read only
 {
-	return buf[i*columns+j]; // is this correct? Unsafe
+	return buf[i*columns+j]; // is this correct? (yes).  Unsafe (Why??) -T
 }
-ostream& operator << (ostream& output, const Matrix& A) 
+ostream& operator << (ostream& output, const Matrix& A)
 {
-	//should we output the dimension first?
-	for ( int i = 0; i < A.GetRows(); i++) 
+	//should we output the dimension first?		//Sure I guess...
+	cout<<"Outputting "<<A.GetRows()<<" x "<<A.GetColumns()<<" Matrix"<<endl;
+	for ( int i = 0; i < A.GetRows(); i++)
 	{
 		for ( int j = 0; j < A.GetColumns(); j++)
 			output << A(i,j) << "\t   ";
-		output << endl; 
+		output << endl;
 	}
-	return output; 
-}
+	return output; }
 
-istream& operator >> (istream& input, Matrix& A) 
+istream& operator >> (istream& input, Matrix& A)	//Is this right? Can we simply use i cnt and A.buf, or is there a scope issue preventing?
 {
 
 	//use BypassComment to skip comments.
+        if(A.buf) delete[] A.buf;
+        BypassComment (input);
+        input>>A.rows;
+	input>>A.columns;		//can remove this if figure out how to input number of data	-T
+	BypassComment (input);		//only need one of these -T
+
+//	input>>ndata;			//Is this correct? I have no idea how to input number of data. If not input, I would like to check  that ndata=m*n,
+					// or check that all matrix is full -T
+        A.buf=new double[A.rows()*A.columns()];
+	for(int i=0;i<A.rows;i++)
+	{
+		for(int j=0; j<A.columns; i++)
+		{
+			input>>A(i,j);
+		}
+	}
 
 	return input;
 }
@@ -116,6 +221,7 @@ istream& operator >> (istream& input, Matrix& A)
 Matrix Matrix::Adjugate() //Transpose of Cofactor Matrix
 {
 	Matrix tmp;
+
         if(rows==0||columns==0)
         {       cout<<"Matrix is empty"<<endl;
                 return tmp;
