@@ -217,7 +217,7 @@ istream& operator >> (istream& input, Matrix& A)	//Is this right? Can we simply 
 
 //	input>>ndata;			//Is this correct? I have no idea how to input number of data. If not input, I would like to check  that ndata=m*n,
 					// or check that all matrix is full -T
-        A.buf=new double[A.rows()*A.columns()];
+        A.buf=new double[A.rows*A.columns];
 	for(int i=0;i<A.rows;i++)
 	{
 		for(int j=0; j<A.columns; i++)
