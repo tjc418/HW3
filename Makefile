@@ -25,7 +25,7 @@
 # The executable file name.
 # It must be specified.
 # PROGRAM   := a.out    # the executable name
-PROGRAM   := hello
+PROGRAM   := test
 
 # The directories in which source files reside.
 # At least one path should be specified.
