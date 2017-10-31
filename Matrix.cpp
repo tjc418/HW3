@@ -1,6 +1,7 @@
 #include "Matrix.h"
 #include "general.h"
 #include <math.h>
+#include <cmath>
 //------------------------------ Implemenation  -----------------------------
 Matrix::Matrix() //default constructor
 {
@@ -63,10 +64,17 @@ Matrix& Matrix::operator = (const Matrix& A) //overloading =
 
 bool Matrix::operator == (const Matrix& A)//overloading ==		//fix for tolerance!! -T	//Handle NULL Matrices! -T
 {
+//	double a;
+//	double b;
+//	double c;
+	double a,b,c;
 	if(rows!=A.rows || columns!=A.columns) return false;
         for(int i=0;i<rows*columns;i++)
-        {
-                if(buf[i]!=A.buf[i]) return false;
+        {	a=buf[i];
+		b=A.buf[i];
+		c=(a+b)/2;
+
+                if(abs((a-b)/c)>.000001) return false;
         }
 
 	return true;
@@ -180,7 +188,7 @@ double& Matrix::operator ()( int i,  int j)// access (i,j)
 		return buf[0];
 	}
 
-	return buf[i*columns+j]; 
+	return buf[i*columns+j];
 }
 double& Matrix::operator()( int i,  int j) const //read only
 {
@@ -191,7 +199,7 @@ double& Matrix::operator()( int i,  int j) const //read only
 	return buf[0];
 	}
 
-	return buf[i*columns+j]; 
+	return buf[i*columns+j];
 }
 ostream& operator << (ostream& output, const Matrix& A)
 {
@@ -235,7 +243,7 @@ Matrix Matrix::Adjugate() //Transpose of Cofactor Matrix
 {
 	Matrix tmp;
 
-        if(rows==0||columns==0)
+        if(rows==0||columns==0)						// This is checking if Matrix is defined, not values in it. -T
         {       cout<<"Matrix is empty"<<endl;
                 return tmp;
         }
@@ -244,8 +252,8 @@ Matrix Matrix::Adjugate() //Transpose of Cofactor Matrix
                 return tmp;
         }
 	Matrix temp;
-	temp=Cofactor();
-	tmp= temp.Transpose();
+	tmp=this->Cofactor();
+	tmp= tmp.Transpose();
 	return tmp;
 }
 double Matrix::Cofactor(int i, int j) //cofactor Cij
@@ -265,7 +273,7 @@ double Matrix::Cofactor(int i, int j) //cofactor Cij
         }
 	double tmp;
 	if ((i+j)%2==0)
-	{	tmp=Minor(i,j);	
+	{	tmp=Minor(i,j);
 	}
 	else
 	{	tmp=Minor(i,j)*(-1);
@@ -293,7 +301,7 @@ Matrix Matrix::Cofactor()//matrix of cofactors
 
 	for(int i=0;i<rows;i++)
 	{	for(int j=0;j<columns;j++)
-		{	tmp.buf[i*columns+j]=Cofactor(i,j);
+		{	tmp.buf[i*columns+j]=Cofactor(i,j);			//could also say tmp(i,j)? -T
 		}
 	}
 
@@ -301,7 +309,7 @@ Matrix Matrix::Cofactor()//matrix of cofactors
 }
 double Matrix::Minor(int i, int j)//Minor Mij
 {
-       
+
         if(rows==0||columns==0)
         {       cout<<"Matrix is empty"<<endl;
                 return false;
@@ -316,7 +324,7 @@ double Matrix::Minor(int i, int j)//Minor Mij
         }
 
 	double tmp;
-	int row=this->rows-1;
+	int row=this->rows-1;							//why is "this" necessary and not just row=rows-1? -T
 	int column=this->columns-1;
 	Matrix M (row, column);
 	for (int a=0;a<row;a++)
@@ -340,7 +348,7 @@ double Matrix::Minor(int i, int j)//Minor Mij
 }
 bool Matrix::IsSingular()
 {
-	if (fabs(this->det()-0)<0.00000001)
+	if (fabs(this->det()-0)<0.00000001)				//Why -0? -T
 	{	cout<<"Singular matrix"<<endl;
 	}
 	else
@@ -378,14 +386,22 @@ Matrix Matrix::Transpose()  //transpose
 	}
 	return tmp;
 }
-Matrix Matrix::Inverse()//Inverse Matrix
+Matrix Matrix::Inverse()//Inverse Matrix		//unsure if calling on Member functions correctly
 {
 	Matrix tmp;
+		if(this->IsSingular());
+		{
+			cout<<"Matrix is Singular, cannot find inverse."<<endl;
+			return tmp;
+		}
+			tmp=(this->Adjugate())*(1/(this->det()));
+
 	return tmp;
 }
 Matrix Matrix::Null(int n) //make a "zero" Matrix, with a new dimension, change "this"
 {
-	buf=new double[n*n];
+	buf=new double[n*n];				//Should we define rows=columns=n?
+	//rows=columns=n
 	for(int i=0;i<(n*n);i++)
 	{	buf[i]=0;
 	}
@@ -400,14 +416,14 @@ Matrix Matrix::Null()//make a "zero" Matrix, does not change the dimension, chan
 }
 Matrix Matrix::Identity( int n)//make a nxn identity matrix,change "this"
 {
-    
+
         buf = new double [n*n];
         for (int i=0; i<n;i++)
 	{	for (int j=0; j<n;j++)
 		{	if (i==j)
 			{	 buf[i*n+j]=1;
 			}
-                	else 
+                	else
 			{	buf[i*n+j]=0;
 			}
 		}
@@ -459,13 +475,13 @@ bool Matrix::LU(Matrix& L, Matrix& U)//LU decomposition. return true if successf
 			}
 		}
 	}
-	
+
 	for (int i=1;i<rows;i++) // Upper elements of Upper matrix = 0
 	{	for (int j=0;j<i;j++)
 		{	U.buf[i*rows+j]=0;
 		}
 	}
-		return true;	
+		return true;
 }
 bool Matrix::QR(Matrix& Q, Matrix& R)
 {
