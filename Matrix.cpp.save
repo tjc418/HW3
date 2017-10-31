@@ -1,7 +1,6 @@
 #include "Matrix.h"
 #include "general.h"
 #include <math.h>
-#include <cmath>
 //------------------------------ Implemenation  -----------------------------
 Matrix::Matrix() //default constructor
 {
@@ -24,8 +23,8 @@ Matrix::Matrix( int m,  int n)//declare an mxn matrix
 }
 Matrix::Matrix(const Matrix& A) //copy constructor	//is there a benefit or necessity for using this-> pointer?
 {
-	cout<<"Copying Matrix...."<<endl;
-//	cout<<"Copying  Matrix "<<A<<"..."<<endl;	//how to do this?
+
+	cout<<"Copying  Matrix "<<A<<"..."<<endl;
 	rows = A.rows;					//this->rows	?
 	columns =  A.columns;				//this->columns	?
 	buf = new double[rows*columns];
@@ -64,17 +63,10 @@ Matrix& Matrix::operator = (const Matrix& A) //overloading =
 
 bool Matrix::operator == (const Matrix& A)//overloading ==		//fix for tolerance!! -T	//Handle NULL Matrices! -T
 {
-//	double a;
-//	double b;
-//	double c;
-	double a,b,c;
 	if(rows!=A.rows || columns!=A.columns) return false;
         for(int i=0;i<rows*columns;i++)
-        {	a=buf[i];
-		b=A.buf[i];
-		c=(a+b)/2;
-
-                if(abs((a-b)/c)>.000001) return false;
+        {
+                if(buf[i]!=A.buf[i]) return false;
         }
 
 	return true;
@@ -128,7 +120,7 @@ Matrix& Matrix::operator *=(const Matrix& A) //overloading *=
         {
 		for(int j=0; j<ncols; j++)		//counts through new Matrix Columns
 		{	sum=0;
-			for(int k=0; k<A.rows; k++)	//Provides Numerical Value for Mat[i,j]
+			for(int k=0; k<rows; k++)	//Provides Numerical Value for Mat[i,j]
 			{
 				sum = sum + buf[i*columns+k]*A.buf[k*A.columns+j];
 			}
@@ -182,7 +174,7 @@ Matrix Matrix::operator - () //unary -
 }
 double& Matrix::operator ()( int i,  int j)// access (i,j)
 {
-	if(i<0 || i>=rows || j<0 || j>=columns)			//Boundary Conditions for Index Paramaters
+	if(i<0 || i>rows || j<0 || j<columns)			//Boundary Conditions for Index Paramaters
 	{
 		cout<<"Check index parameters, returning first value (0,0)"<<endl;
 		return buf[0];
@@ -193,7 +185,7 @@ double& Matrix::operator ()( int i,  int j)// access (i,j)
 double& Matrix::operator()( int i,  int j) const //read only
 {
 
-        if(i<0 || i>=rows || j<0 || j>=columns)			//Index Paramaters BC
+        if(i<0 || i>rows || j<0 || j>columns)			//Index Paramaters BC
 	{
 		cout<<"Check index parameters, returning first value (0,0)"<<endl;
 	return buf[0];
@@ -204,7 +196,7 @@ double& Matrix::operator()( int i,  int j) const //read only
 ostream& operator << (ostream& output, const Matrix& A)
 {
 	//should we output the dimension first?		//Sure I guess...
-	cout<<A.GetRows()<<" x "<<A.GetColumns()<<" Matrix:"<<endl;
+	cout<<"Outputting "<<A.GetRows()<<" x "<<A.GetColumns()<<" Matrix"<<endl;
 	for ( int i = 0; i < A.GetRows(); i++)
 	{
 		for ( int j = 0; j < A.GetColumns(); j++)
@@ -215,7 +207,7 @@ ostream& operator << (ostream& output, const Matrix& A)
 
 istream& operator >> (istream& input, Matrix& A)	//Is this right? Can we simply use i cnt and A.buf, or is there a scope issue preventing?
 {
-							//Want to add counter i++ if i<rows*columns then cout error or add zeros -T
+
 	//use BypassComment to skip comments.
         if(A.buf) delete[] A.buf;
         BypassComment (input);
@@ -226,16 +218,14 @@ istream& operator >> (istream& input, Matrix& A)	//Is this right? Can we simply 
 //	input>>ndata;			//Is this correct? I have no idea how to input number of data. If not input, I would like to check  that ndata=m*n,
 					// or check that all matrix is full -T
         A.buf=new double[A.rows*A.columns];
-	while(!input.eof())
-	{
 	for(int i=0;i<A.rows;i++)
 	{
-		for(int j=0; j<A.columns; j++)
+		for(int j=0; j<A.columns; i++)
 		{
 			input>>A(i,j);
 		}
 	}
-	}
+
 	return input;
 }
 
@@ -254,8 +244,8 @@ Matrix Matrix::Adjugate() //Transpose of Cofactor Matrix
                 return tmp;
         }
 	Matrix temp;
-	tmp=this->Cofactor();
-	tmp= tmp.Transpose();
+	temp=Cofactor();						//Should this be temp.Cofactor() ? -T
+	tmp= temp.Transpose();
 	return tmp;
 }
 double Matrix::Cofactor(int i, int j) //cofactor Cij
@@ -303,7 +293,7 @@ Matrix Matrix::Cofactor()//matrix of cofactors
 
 	for(int i=0;i<rows;i++)
 	{	for(int j=0;j<columns;j++)
-		{	tmp.buf[i*columns+j]=Cofactor(i,j);			//could also say tmp(i,j)? -T
+		{	tmp.buf[i*columns+j]=Cofactor(i,j);
 		}
 	}
 
@@ -388,15 +378,9 @@ Matrix Matrix::Transpose()  //transpose
 	}
 	return tmp;
 }
-Matrix Matrix::Inverse()//Inverse Matrix		//unsure if calling on Member functions correctly
+Matrix Matrix::Inverse()//Inverse Matrix
 {
 	Matrix tmp;
-		if(this->IsSingular());
-		{
-			cout<<"Matrix is Singular, cannot find inverse."<<endl;
-			return tmp;
-		}
-			tmp=(this->Adjugate())*(1/(this->det()));
 
 	return tmp;
 }
@@ -425,7 +409,7 @@ Matrix Matrix::Identity( int n)//make a nxn identity matrix,change "this"
 		{	if (i==j)
 			{	 buf[i*n+j]=1;
 			}
-                	else
+                	else 
 			{	buf[i*n+j]=0;
 			}
 		}
@@ -489,19 +473,16 @@ bool Matrix::QR(Matrix& Q, Matrix& R)
 {
 	return true;
 }
-double Matrix::det()//determinant(Matrix)		//MADE ADJUSTMENTS -T
+double Matrix::det()//determinant(Matrix)
 {
-        double tmp=1;					//Fixed Determinant, but don't know how to determine if Det is + or - (Please advise)
+	double tmp;
 	Matrix aux;
-//	aux=*this;
+	aux=*this;
 	Matrix L;
 	Matrix U;
-//	aux.LU(L,U);
-	this->LU(L,U);
+	aux.LU(L,U);
 	for (int i=0; i<columns; i++)
-	{//	aux.buf[i]=L.buf[i*columns+i]*U.buf[i*columns+i];
-		tmp=tmp*U.buf[i*columns+i];
-
+	{	aux.buf[i]=L.buf[i*columns+i]*U.buf[i*columns+i];
 	}
 	return tmp;
 }
