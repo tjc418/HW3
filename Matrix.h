@@ -10,7 +10,7 @@
 using namespace std;
 //----------------------------Definition of a Matrix class-----------------------------------------------
 
-class Matrix 
+class Matrix
  {
 	public:
 		Matrix(); //default constructor
@@ -23,7 +23,7 @@ class Matrix
 		//operators
 		bool operator == (const Matrix& A);//overloading ==
 		bool operator != (const Matrix& A);//overloading !=
-		
+
 		Matrix& operator += (const Matrix& A); //overloading +=
 		Matrix& operator -=(const Matrix& A); //overloading -=
 		Matrix& operator *=(const Matrix& A); //overloading *=
@@ -46,9 +46,9 @@ class Matrix
 		bool QR(Matrix& Q, Matrix& R); //QR decomposition. return true is successful.
 
 		double det();//determinant(Matrix)
-		
+
 		Vector Eigenvalues();//find the eigen values and store them in a vector
-		Vector Root(const Vector& b);//solving linear system of equations. b is actually a vector  
+		Vector Root(const Vector& b);//solving linear system of equations. b is actually a vector
 
 		Matrix Adjugate(); //Adjoint/Adjugate
 		double Cofactor(int i, int j); //cofactor Cij
@@ -60,21 +60,21 @@ class Matrix
 		bool IsSymmetric();
 		//
 
-		//Added 
+		//Added
 		const int GetRows() const; //Get the dimension of the Matrix
 		const int GetColumns() const;
-	
+
 	private:
-		int rows; 
+		int rows;
 		int columns;
 		double* buf;
-	
+
 	//<< and >>
 	friend ostream& operator << (ostream& output, const Matrix& A);
 	friend istream& operator >> (istream& input, Matrix& A);
 
 };
-	
+
 
 //operators, + - * can be overloaded as global operators
 
@@ -85,6 +85,6 @@ Matrix operator * (double a, const Matrix& A); //Matrix a*A, using *= .....
 Matrix operator * (const Matrix& A, double a ); //Matrix A*a, using *= .....
 
 Vector operator * (const Vector& b, const Matrix& A); //Vecttor*Matrix, b*A,
-Vector operator * (const Matrix& A, const Vector& b); //Matrix A*b, 
+Vector operator * (const Matrix& A, const Vector& b); //Matrix A*b,
 
 #endif
