@@ -1,6 +1,7 @@
 #include "Vector.h"
 #include "general.h"
 #include <math.h>
+#include <cmath>
 #include <iostream>
 #include <cstdlib>
 using namespace std;
@@ -22,8 +23,9 @@ Vector::Vector(int s)
 
 Vector::Vector(const Vector& A)
 {
-	cout<<"copy constructor..."<<endl;
+
         this->size=A.size; // "this" the pointer points the object it self
+	cout<<"size is "<<size<<endl;
         buf=new double [size];
         for(int i=0;i<size;i++)
         {	buf[i]=A.buf[i];
@@ -55,9 +57,12 @@ Vector& Vector::operator = (const Vector& B)//Bector B is const, I want to chang
 
 bool Vector::operator ==(const Vector& B)
 {
+	double er;
         if(size!=B.size) return false;
         for(int i=0;i<size;i++)
-        {       if(buf[i] != B.buf[i]) return false;
+        {       
+		er=(abs(buf[i] -  B.buf[i]))/((buf[i]+B.buf[i])/2);
+		if(er>.00001) return false;
 	}
 	return true;
 }
@@ -68,7 +73,14 @@ bool Vector::operator !=(const Vector& B)
 }
 Vector Vector::operator +(const Vector& B)
 {
-	Vector tmp;
+
+	Vector tmp(size);
+	if(size!=B.size)
+	{
+		cout<<"Vectors cannot be added"<<endl;
+		return tmp;
+	}
+
 	for(int i=0;i<size;i++)
 	{	tmp.buf[i] = buf[i] + B.buf[i];
 	}
@@ -76,7 +88,15 @@ Vector Vector::operator +(const Vector& B)
 }
 Vector Vector::operator -(const Vector& B)
 {
-	Vector tmp;
+	Vector tmp(size);
+        if(size!=B.size)
+        {
+                cout<<"Vectors cannot be subtracted, don't you know?"<<endl;
+                return tmp;
+        }
+
+
+
         for(int i=0;i<size;i++)
         {       tmp.buf[i] = buf[i] - B.buf[i];
 	}
@@ -84,7 +104,7 @@ Vector Vector::operator -(const Vector& B)
 }
 Vector Vector::operator *(double a) //vector A*a
 {
-	Vector tmp;
+	Vector tmp(size);
 	for(int i=0;i<size;i++)
 	{	tmp.buf[i] = buf[i]*a;
 	}
@@ -93,11 +113,11 @@ Vector Vector::operator *(double a) //vector A*a
 }
 double Vector::operator *(const Vector& B) //dot product
 {
-	if(size!=B.size) return false; 
-	
+	if(size!=B.size) return false;
+
 	double x=0;
 	for(int i=0;i<size;i++)
-	{	x  = buf[i]*B.buf[i];
+	{	x  = x+ buf[i]*B.buf[i];
 	}
 	return x;
 }
@@ -105,6 +125,8 @@ double& Vector::operator [](int i)//A[i];
 {
         if(i<0 || i>=size)
         {//error...
+	cout<<"well that didn't work"<<endl;
+	return buf[0];
         }
 
 	return buf[i]; //unsafe!
@@ -112,12 +134,14 @@ double& Vector::operator [](int i)//A[i];
 double& Vector::operator [](int i) const//A[i], read only;
 {
         if(i<0 || i>=size)
-        {//error...
+        {//error..
+		cout<<"Wrong i"<<endl;
+		return buf[0];
         }
 
 	return buf[i]; //unsafe!
 }
-		
+
 //Member functions
 int Vector::Size() const  //get the size of the Vector
 {
@@ -225,10 +249,12 @@ void Vector::Sort(bool Ascending) //sorting.
 }
 
 ostream& operator << (ostream& output, const Vector& A)
-{
+{	
+	cout<<"[";
         for(int i=0; i<A.size;i++)
-        {        output<<A[i];
+        {        output<<A[i]<<" ";
 	}
+	cout<<"]"<<endl;
 	return output;
 }
 istream& operator >> (istream& input, Vector& A)

@@ -150,7 +150,7 @@ Matrix& Matrix::operator *=(double a) //overloading *=
 	return *this;
 }
 
-Matrix& Matrix::operator *=(const Vector& b) //overloading *=		does this work?
+Matrix& Matrix::operator *=(const Vector& b) //overloading *=
 {
 	const int Sizeb=b.Size();
 
@@ -164,9 +164,7 @@ Matrix& Matrix::operator *=(const Vector& b) //overloading *=		does this work?
 	{
 		tmp.buf[i]=b[i];
 	}
-
-
-					//return the cross product
+						//return the cross product
 	return ((*this)*=tmp);
 }
 
@@ -352,11 +350,12 @@ bool Matrix::IsSingular()
 {
 	if (fabs(this->det()-0)<0.00000001)				//Why -0? -T
 	{	cout<<"Singular matrix"<<endl;
+		return true;
 	}
 	else
 	{	cout<<"Not singular Matrix"<<endl;
 	}
-	return (fabs(this->det()-0)<0.00000001);
+	return false;
 }
 bool Matrix::IsSymmetric()
 {
@@ -391,7 +390,7 @@ Matrix Matrix::Transpose()  //transpose
 Matrix Matrix::Inverse()//Inverse Matrix		//unsure if calling on Member functions correctly
 {
 	Matrix tmp;
-		if(this->IsSingular());
+		if(this->IsSingular())
 		{
 			cout<<"Matrix is Singular, cannot find inverse."<<endl;
 			return tmp;
@@ -403,7 +402,7 @@ Matrix Matrix::Inverse()//Inverse Matrix		//unsure if calling on Member function
 Matrix Matrix::Null(int n) //make a "zero" Matrix, with a new dimension, change "this"
 {
 	buf=new double[n*n];				//Should we define rows=columns=n?
-	//rows=columns=n
+	rows=columns=n;
 	for(int i=0;i<(n*n);i++)
 	{	buf[i]=0;
 	}
@@ -491,15 +490,19 @@ bool Matrix::QR(Matrix& Q, Matrix& R)
 }
 double Matrix::det()//determinant(Matrix)		//MADE ADJUSTMENTS -T
 {
+        Matrix L;
+        Matrix U;
+
+	if (!(this-> LU(L,U)))
+	{
+		cout<<"Cannot compute determinant"<<endl;
+		return 0.0;
+	}
         double tmp=1;					//Fixed Determinant, but don't know how to determine if Det is + or - (Please advise)
 	Matrix aux;
-//	aux=*this;
-	Matrix L;
-	Matrix U;
-//	aux.LU(L,U);
 	this->LU(L,U);
 	for (int i=0; i<columns; i++)
-	{//	aux.buf[i]=L.buf[i*columns+i]*U.buf[i*columns+i];
+	{
 		tmp=tmp*U.buf[i*columns+i];
 
 	}
@@ -517,13 +520,16 @@ Vector Matrix::Root(const Vector& b)//solving linear system of equations. b is a
 	Matrix inv;
 	M.rows=rows;
 	M.columns=columns;
-	inv.rows=rows;
-	inv.columns=columns;
+
+	if (rows!=b.Size())
+	{	cout<<"Dimension problems for Root"<<endl;
+		return tmp;
+	}
 
 	M=*this;
 	inv=M.Inverse();
 	tmp=inv*b;
-
+	
 	return tmp;
 }
 //------------------------------------------------------------------------------------------------
@@ -570,26 +576,30 @@ Matrix operator * (const Matrix& A, double a ) //Matrix A*a, using *= .....
 
 Vector operator * (const Vector& b, const Matrix& A ) //Matrix A*a, using *= .....
 {
+
 	//do b*A
 	int c= A.GetColumns();
 	int r= A.GetRows();
+	Vector tmp(c);
 
-	Vector tmp;
-	if (b.Size()!=c)
+	if (b.Size()!=r)
 	{	cout<<"Vector x Matrix can not be multiplied because of dimension issues"<<endl;
+		return tmp;
 	}
-	else
-        {	for (int i=0;i<c;i++)
+
+	for (int i=0;i<c;i++)
         	{	for(int j=0;j<r;j++)
-                	{       tmp[i]=tmp[i]+b[j]*A(i,j);
+                	{	tmp[i]=tmp[i]+A(j,i)*b[j];
 			}
 		}
-	}
+
 	return tmp;
 };
 Vector operator * (const Matrix& A, const Vector& b) //Matrix A*b, 
 {
-	Vector tmp;
+	cout<<b<<endl;
+	cout<<b.Size()<<endl;
+	Vector tmp(b.Size());
 	//do A*b
 	int c= A.GetColumns();
 	int r= A.GetRows();
